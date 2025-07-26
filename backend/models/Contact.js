@@ -1,8 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const ContactSchema = new mongoose.Schema({
-    image: { type: String, default: null },
-    description: { type: String, required: true }
-} , {timestamps : true});
+const contactSchema = new mongoose.Schema({
+  description: {
+    type: String, 
+    required: true
+  }
+}, { timestamps: true });
 
-export default mongoose.model("Contact", ContactSchema);
+export default mongoose.model('Contact', contactSchema);
