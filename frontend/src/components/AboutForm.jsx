@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function AboutForm({ data, onSave }) {
+export default function AboutForm({ data, onSave, onCancel }) {
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
 
@@ -34,6 +34,15 @@ export default function AboutForm({ data, onSave }) {
       <button type="submit" disabled={!description}>
         {data ? 'Update' : 'Create'}
       </button>
+      {data && (
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{ marginLeft: 10 }}
+        >
+          Cancel
+        </button>
+      )}
     </form>
   );
 }

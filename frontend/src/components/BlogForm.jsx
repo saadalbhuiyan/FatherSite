@@ -57,7 +57,11 @@ export default function BlogForm({ blog, onSave, onCancel }) {
       />
       <button type="submit">{blog ? 'Update' : 'Create'}</button>
       {blog && (
-        <button type="button" onClick={onCancel}>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{ marginLeft: 10 }}
+        >
           Cancel
         </button>
       )}

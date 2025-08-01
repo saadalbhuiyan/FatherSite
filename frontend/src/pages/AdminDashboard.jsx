@@ -10,12 +10,15 @@ import AboutForm from '../components/AboutForm';
 import ContactForm from '../components/ContactForm';
 import Navbar from '../components/Navbar';
 
-
 export default function AdminDashboard() {
   const [blogs, setBlogs] = useState([]);
   const [editingBlog, setEditingBlog] = useState(null);
+
   const [about, setAbout] = useState(null);
+  const [editingAbout, setEditingAbout] = useState(false);
+
   const [contact, setContact] = useState(null);
+  const [editingContact, setEditingContact] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -32,35 +35,51 @@ export default function AdminDashboard() {
     if (contactRes.status === 'fulfilled') setContact(contactRes.value.data);
   };
 
+  // Blog handlers
   const handleSaveBlog = async (fd) => {
-    editingBlog ? await updateBlog(editingBlog._id, fd) : await createBlog(fd);
+    if (editingBlog) await updateBlog(editingBlog._id, fd);
+    else await createBlog(fd);
     setEditingBlog(null);
     loadAllData();
   };
 
   const handleDeleteBlog = async (id) => {
-    await deleteBlog(id);
-    loadAllData();
+    if (window.confirm('Are you sure you want to delete this blog?')) {
+      await deleteBlog(id);
+      loadAllData();
+    }
   };
 
+  // About handlers
   const handleSaveAbout = async (fd) => {
-    about ? await updateAbout(fd) : await createAbout(fd);
+    if (about) await updateAbout(fd);
+    else await createAbout(fd);
+    setEditingAbout(false);
     loadAllData();
   };
 
   const handleDeleteAbout = async () => {
-    await deleteAbout();
-    setAbout(null);
+    if (window.confirm('Are you sure you want to delete About information?')) {
+      await deleteAbout();
+      setAbout(null);
+      setEditingAbout(false);
+    }
   };
 
+  // Contact handlers
   const handleSaveContact = async (fd) => {
-    contact ? await updateContact(fd) : await createContact(fd);
+    if (contact) await updateContact(fd);
+    else await createContact(fd);
+    setEditingContact(false);
     loadAllData();
   };
 
   const handleDeleteContact = async () => {
-    await deleteContact();
-    setContact(null);
+    if (window.confirm('Are you sure you want to delete Contact information?')) {
+      await deleteContact();
+      setContact(null);
+      setEditingContact(false);
+    }
   };
 
   const handleLogout = () => {
@@ -70,17 +89,16 @@ export default function AdminDashboard() {
   };
 
   return (
-
     <div style={{ padding: 20 }}>
-            <Navbar />
-      
+      <Navbar />
+
       <h1>Admin Dashboard</h1>
       <button onClick={handleLogout}>Logout</button>
 
       {/* About Section */}
       <hr />
       <h2>About Section</h2>
-      {about && (
+      {!editingAbout && about && (
         <div>
           <p>{about.description}</p>
           {about.imageUrl && (
@@ -90,15 +108,27 @@ export default function AdminDashboard() {
               width={150}
             />
           )}
-          <button onClick={handleDeleteAbout}>Delete</button>
+          <button onClick={() => setEditingAbout(true)}>Edit</button>
+          <button
+            onClick={handleDeleteAbout}
+            style={{ marginLeft: 10, backgroundColor: 'red', color: 'white' }}
+          >
+            Delete
+          </button>
         </div>
       )}
-      <AboutForm data={about} onSave={handleSaveAbout} />
+      {(editingAbout || !about) && (
+        <AboutForm
+          data={about}
+          onSave={handleSaveAbout}
+          onCancel={() => setEditingAbout(false)}
+        />
+      )}
 
       {/* Contact Section */}
       <hr />
       <h2>Contact Section</h2>
-      {contact && (
+      {!editingContact && contact && (
         <div>
           <p>{contact.description}</p>
           {contact.image && (
@@ -108,10 +138,22 @@ export default function AdminDashboard() {
               width={150}
             />
           )}
-          <button onClick={handleDeleteContact}>Delete</button>
+          <button onClick={() => setEditingContact(true)}>Edit</button>
+          <button
+            onClick={handleDeleteContact}
+            style={{ marginLeft: 10, backgroundColor: 'red', color: 'white' }}
+          >
+            Delete
+          </button>
         </div>
       )}
-      <ContactForm data={contact} onSave={handleSaveContact} />
+      {(editingContact || !contact) && (
+        <ContactForm
+          data={contact}
+          onSave={handleSaveContact}
+          onCancel={() => setEditingContact(false)}
+        />
+      )}
 
       {/* Blogs Section */}
       <hr />
@@ -151,7 +193,12 @@ export default function AdminDashboard() {
             </div>
             <div>
               <button onClick={() => setEditingBlog(b)}>Edit</button>
-              <button onClick={() => handleDeleteBlog(b._id)}>Delete</button>
+              <button
+                onClick={() => handleDeleteBlog(b._id)}
+                style={{ marginLeft: 10, backgroundColor: 'red', color: 'white' }}
+              >
+                Delete
+              </button>
             </div>
           </li>
         ))}
