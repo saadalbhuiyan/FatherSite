@@ -10,5 +10,10 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendMail = async (to, subject, text) => {
-  await transporter.sendMail({ from: "saadalbhuiyan@gmail.com", to, subject, text });
+  try {
+    await transporter.sendMail({ from: "saadalbhuiyan@gmail.com", to, subject, text });
+    console.log("Email sent to", to);
+  } catch (error) {
+    console.error("Email send failed:", error);
+  }
 };

@@ -2,52 +2,68 @@ import Contact from "../models/Contact.js";
 
 export const createContact = async (req, res) => {
   try {
-    const { description } = req.body;
-    if (!description) return res.status(400).json({ message: "Description required" });
-    const record = new Contact({ description, image: req.body.imageUrl });
-    await record.save();
-    res.status(201).json(record);
+    const { description, imageUrl } = req.body;
+    if (!description) return res.status(400).json({ message: "Description is required" });
+
+    const existing = await Contact.findOne();
+    if (existing) return res.status(409).json({ message: "Contact info already exists" });
+
+    const newContact = new Contact({ description, image: imageUrl || null });
+    await newContact.save();
+    res.status(201).json(newContact);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Create Contact Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const getAdminContact = async (_req, res) => {
   try {
     const record = await Contact.findOne();
-    res.json(record || {});
+    res.status(200).json(record || {});
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Get Admin Contact Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const updateContact = async (req, res) => {
   try {
-    const update = {};
-    if (req.body.description !== undefined) update.description = req.body.description;
-    if (req.body.imageUrl !== undefined) update.image = req.body.imageUrl;
+    const { description, imageUrl } = req.body;
 
-    const record = await Contact.findOneAndUpdate({}, update, { new: true, upsert: true });
-    res.json(record);
+    const existing = await Contact.findOne();
+    if (!existing) return res.status(404).json({ message: "No contact info found to update" });
+
+    if (description !== undefined) existing.description = description;
+    if (imageUrl !== undefined) existing.image = imageUrl;
+
+    await existing.save();
+    res.status(200).json(existing);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Update Contact Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const deleteContact = async (_req, res) => {
   try {
-    await Contact.deleteMany({});
-    res.json({ message: "Contact info deleted" });
+    const existing = await Contact.findOne();
+    if (!existing) return res.status(404).json({ message: "No contact info to delete" });
+
+    await Contact.deleteOne({ _id: existing._id });
+    res.status(200).json({ message: "Contact info deleted" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Delete Contact Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const getPublicContact = async (_req, res) => {
   try {
     const record = await Contact.findOne();
-    res.json(record || {});
+    res.status(200).json(record || {});
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Get Public Contact Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

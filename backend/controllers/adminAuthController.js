@@ -27,8 +27,8 @@ export const sendOtp = async (req, res) => {
 
     res.json({ message: "OTP sent to email" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Send OTP Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -38,7 +38,10 @@ export const verifyOtp = async (req, res) => {
     if (!email || !otp) return res.status(400).json({ message: "Email and OTP required" });
 
     const admin = await Admin.findOne({ email });
-    if (!admin) return res.status(400).json({ message: "Admin not found" });
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+
+    if (!admin.otp || !admin.otpExpiresAt)
+      return res.status(400).json({ message: "No OTP found. Please request a new one." });
 
     if (new Date() > admin.otpExpiresAt)
       return res.status(400).json({ message: "OTP expired" });
@@ -55,12 +58,11 @@ export const verifyOtp = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Verify OTP Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const logout = (_req, res) => {
-  // For stateless JWT, client discards token; optionally blacklist in Redis later
   res.json({ message: "Logged out successfully" });
 };
