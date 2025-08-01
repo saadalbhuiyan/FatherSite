@@ -2,18 +2,15 @@ import { useEffect, useState } from 'react';
 
 export default function BlogForm({ blog, onSave, onCancel }) {
   const [title, setTitle] = useState('');
-  const [slug, setSlug] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
 
   useEffect(() => {
     if (blog) {
       setTitle(blog.title);
-      setSlug(blog.slug);
       setContent(blog.content);
     } else {
       setTitle('');
-      setSlug('');
       setContent('');
       setImage(null);
     }
@@ -23,7 +20,6 @@ export default function BlogForm({ blog, onSave, onCancel }) {
     e.preventDefault();
     const fd = new FormData();
     fd.append('title', title);
-    fd.append('slug', slug);
     fd.append('content', content);
     if (image) fd.append('image', image);
     onSave(fd);
@@ -36,12 +32,6 @@ export default function BlogForm({ blog, onSave, onCancel }) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
-        required
-      />
-      <input
-        value={slug}
-        onChange={(e) => setSlug(e.target.value)}
-        placeholder="Slug"
         required
       />
       <textarea
