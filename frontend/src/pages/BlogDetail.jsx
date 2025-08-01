@@ -6,29 +6,47 @@ import Navbar from '../components/Navbar';
 export default function BlogDetail() {
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBlog(id).then(res => setBlog(res.data));
+    fetchBlog(id)
+      .then((res) => setBlog(res.data))
+      .finally(() => setLoading(false));
   }, [id]);
-
-  if (!blog) return <p>Loading…</p>;
 
   return (
     <>
       <Navbar />
-      <Link to="/blogs">← Back to blogs</Link>
-      <h1>{blog.title}</h1>
+      <div style={{ maxWidth: 800, margin: 'auto', padding: 16 }}>
+        <Link to="/blogs">← Back to blogs</Link>
 
-      {blog.image && (
-        <img
-          src={`http://localhost:5000${blog.image}`}
-          alt={blog.title}
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
-      )}
+        {loading ? (
+          <p>Loading…</p>
+        ) : blog ? (
+          <>
+            <h1>{blog.title}</h1>
 
-      <div dangerouslySetInnerHTML={{ __html: blog.content }} />
-      <small>{new Date(blog.createdAt).toLocaleString()}</small>
+            {blog.image && (
+              <img
+                src={`http://localhost:5000${blog.image}`}
+                alt={blog.title}
+                style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 16 }}
+              />
+            )}
+
+            <div
+              style={{ lineHeight: 1.6 }}
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            />
+
+            <p style={{ marginTop: 20, fontSize: 14, color: '#888' }}>
+              Posted on: {new Date(blog.createdAt).toLocaleString()}
+            </p>
+          </>
+        ) : (
+          <p>Blog not found.</p>
+        )}
+      </div>
     </>
   );
 }

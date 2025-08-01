@@ -7,17 +7,25 @@ import BlogList from './pages/BlogList';
 import BlogDetail from './pages/BlogDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<BlogList />} />
+      <Route path="/" element={<Home />} />
       <Route path="/blogs" element={<BlogList />} />
       <Route path="/blogs/:id" element={<BlogDetail />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/admin" element={<AdminLogin />} />
-      <Route path="/admin-dash" element={<AdminDashboard />} />
+      <Route
+        path="/admin-dash"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

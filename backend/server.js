@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { connectDB } from "./config/db.js";
@@ -17,35 +18,40 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middlewares
-app.use(cors());
+// ===== Middlewares =====
+app.use(cookieParser());
+app.use(cors({
+  origin: "http://localhost:5173", // Replace with your frontend domain
+  credentials: true,
+}));
 app.use(express.json());
 
-// Serve static files
+// Static
 app.use("/uploads", express.static(resolve("uploads")));
 
-// Admin routes (protected)
+// ===== Routes =====
+// Admin (auth + protected)
 app.use("/api/admin", adminAuthRoutes);
 app.use("/api/admin/blogs", blogRoutes);
 app.use("/api/admin/about", aboutRoutes);
 app.use("/api/admin/contact", contactRoutes);
 
-// Public routes
+// Public
 app.use("/api/blogs", blogRoutes);
 app.use("/api/about", aboutRoutes);
 app.use("/api/contact", contactRoutes);
 
-// 404 handler
+// 404
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// Error handler
+// Global error handler
 app.use((err, req, res, next) => {
   console.error("Global error:", err);
   res.status(500).json({ message: "Server error" });
 });
 
-// Start server
+// Start
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

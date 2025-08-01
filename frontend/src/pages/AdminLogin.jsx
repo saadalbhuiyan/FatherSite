@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sendOtp, verifyOtp } from '../api';
 
@@ -9,10 +9,24 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      nav('/admin-dash');
+    }
+  }, [nav]);
+
   const handleSend = async () => {
     setLoading(true);
-    try { await sendOtp(email); setStep(2); } catch { alert('Send failed'); }
-    finally { setLoading(false); }
+    try {
+      await sendOtp(email);
+      setStep(2);
+    } catch {
+      alert('Send failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerify = async () => {
@@ -21,8 +35,11 @@ export default function AdminLogin() {
       const { data } = await verifyOtp(email, otp);
       localStorage.setItem('adminToken', data.token);
       nav('/admin-dash');
-    } catch { alert('Wrong OTP'); }
-    finally { setLoading(false); }
+    } catch {
+      alert('Wrong OTP');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,14 +47,28 @@ export default function AdminLogin() {
       <h2>Admin Login</h2>
       {step === 1 && (
         <>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
-          <button onClick={handleSend} disabled={loading}>{loading ? 'Sending…' : 'Send OTP'}</button>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            required
+          />
+          <button onClick={handleSend} disabled={loading}>
+            {loading ? 'Sending…' : 'Send OTP'}
+          </button>
         </>
       )}
       {step === 2 && (
         <>
-          <input value={otp} onChange={e => setOtp(e.target.value)} placeholder="OTP" required />
-          <button onClick={handleVerify} disabled={loading}>{loading ? 'Verifying…' : 'Verify'}</button>
+          <input
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            placeholder="OTP"
+            required
+          />
+          <button onClick={handleVerify} disabled={loading}>
+            {loading ? 'Verifying…' : 'Verify'}
+          </button>
         </>
       )}
     </div>

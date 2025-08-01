@@ -2,163 +2,160 @@ import { useEffect, useState } from 'react';
 import {
   fetchBlogs, createBlog, updateBlog, deleteBlog, logout,
   getAboutAdmin, createAbout, updateAbout, deleteAbout,
-  getContactAdmin, createContact, updateContact, deleteContact
+  getContactAdmin, createContact, updateContact, deleteContact,
 } from '../api';
+
 import BlogForm from '../components/BlogForm';
 import AboutForm from '../components/AboutForm';
 import ContactForm from '../components/ContactForm';
+import Navbar from '../components/Navbar';
+
 
 export default function AdminDashboard() {
-  /* ---------- blogs ---------- */
   const [blogs, setBlogs] = useState([]);
-  const [editing, setEditing] = useState(null);
-
-  /* ---------- about ---------- */
+  const [editingBlog, setEditingBlog] = useState(null);
   const [about, setAbout] = useState(null);
-
-  /* ---------- contact ---------- */
   const [contact, setContact] = useState(null);
 
-  /* ---------- loaders ---------- */
-  const loadBlogs = async () => {
-    const { data } = await fetchBlogs();
-    setBlogs(data);
-  };
-  const loadAbout = async () => {
-    try {
-      const { data } = await getAboutAdmin();
-      setAbout(data);
-    } catch {}
-  };
-  const loadContact = async () => {
-    try {
-      const { data } = await getContactAdmin();
-      setContact(data);
-    } catch {}
-  };
-
   useEffect(() => {
-    loadBlogs();
-    loadAbout();
-    loadContact();
+    loadAllData();
   }, []);
 
-  /* ---------- CRUD handlers ---------- */
-  const saveBlog = async (fd) => {
-    editing ? await updateBlog(editing._id, fd) : await createBlog(fd);
-    setEditing(null);
-    loadBlogs();
-  };
-  const delBlog = async (id) => {
-    await deleteBlog(id);
-    loadBlogs();
+  const loadAllData = async () => {
+    const [blogsRes, aboutRes, contactRes] = await Promise.allSettled([
+      fetchBlogs(),
+      getAboutAdmin(),
+      getContactAdmin(),
+    ]);
+    if (blogsRes.status === 'fulfilled') setBlogs(blogsRes.value.data);
+    if (aboutRes.status === 'fulfilled') setAbout(aboutRes.value.data);
+    if (contactRes.status === 'fulfilled') setContact(contactRes.value.data);
   };
 
-  const saveAbout = async (fd) => {
-    about ? await updateAbout(fd) : await createAbout(fd);
-    loadAbout();
+  const handleSaveBlog = async (fd) => {
+    editingBlog ? await updateBlog(editingBlog._id, fd) : await createBlog(fd);
+    setEditingBlog(null);
+    loadAllData();
   };
-  const delAbout = async () => {
+
+  const handleDeleteBlog = async (id) => {
+    await deleteBlog(id);
+    loadAllData();
+  };
+
+  const handleSaveAbout = async (fd) => {
+    about ? await updateAbout(fd) : await createAbout(fd);
+    loadAllData();
+  };
+
+  const handleDeleteAbout = async () => {
     await deleteAbout();
     setAbout(null);
   };
 
-  const saveContact = async (fd) => {
+  const handleSaveContact = async (fd) => {
     contact ? await updateContact(fd) : await createContact(fd);
-    loadContact();
+    loadAllData();
   };
-  const delContact = async () => {
+
+  const handleDeleteContact = async () => {
     await deleteContact();
     setContact(null);
   };
 
-  return (
-    <>
-      <h1>Admin Dashboard</h1>
-      <button onClick={() => { logout(); localStorage.removeItem('adminToken'); window.location.href = '/'; }}>
-        Logout
-      </button>
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem('adminToken');
+    window.location.href = '/';
+  };
 
-      {/* ---- About ---- */}
+  return (
+
+    <div style={{ padding: 20 }}>
+            <Navbar />
+      
+      <h1>Admin Dashboard</h1>
+      <button onClick={handleLogout}>Logout</button>
+
+      {/* About Section */}
       <hr />
       <h2>About Section</h2>
       {about && (
-        <>
+        <div>
           <p>{about.description}</p>
           {about.imageUrl && (
-            <img src={`http://localhost:5000${about.imageUrl}`} alt="About" width={150} />
+            <img
+              src={`http://localhost:5000${about.imageUrl}`}
+              alt="About"
+              width={150}
+            />
           )}
-          <button onClick={delAbout}>Delete</button>
-        </>
+          <button onClick={handleDeleteAbout}>Delete</button>
+        </div>
       )}
-      <AboutForm data={about} onSave={saveAbout} />
+      <AboutForm data={about} onSave={handleSaveAbout} />
 
-      {/* ---- Contact ---- */}
+      {/* Contact Section */}
       <hr />
       <h2>Contact Section</h2>
       {contact && (
-        <>
+        <div>
           <p>{contact.description}</p>
           {contact.image && (
-            <img src={`http://localhost:5000${contact.image}`} alt="Contact" width={150} />
+            <img
+              src={`http://localhost:5000${contact.image}`}
+              alt="Contact"
+              width={150}
+            />
           )}
-          <button onClick={delContact}>Delete</button>
-        </>
+          <button onClick={handleDeleteContact}>Delete</button>
+        </div>
       )}
-      <ContactForm data={contact} onSave={saveContact} />
+      <ContactForm data={contact} onSave={handleSaveContact} />
 
-      {/* ---- Blogs ---- */}
-      {/* ---- Blogs ---- */}
-<hr />
-<h2>All Blogs</h2>
-
-{/* Create / Edit form stays the same */}
-<BlogForm
-  blog={editing}
-  onSave={saveBlog}
-  onCancel={() => setEditing(null)}
-/>
-
-<ul style={{ listStyle: 'none', padding: 0, marginTop: 16 }}>
-  {blogs.map((b) => (
-    <li
-      key={b._id}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        marginBottom: 12,
-        padding: 8,
-        border: '1px solid #ddd',
-        borderRadius: 4,
-      }}
-    >
-      {/* thumbnail image */}
-      {b.image && (
-        <img
-          src={`http://localhost:5000${b.image}`}
-          alt={b.title}
-          style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }}
-        />
-      )}
-
-      {/* title + preview */}
-      <div style={{ flex: 1 }}>
-        <strong>{b.title}</strong>
-        <p style={{ margin: 0, fontSize: 14, color: '#555' }}>
-          {b.content.slice(0, 100)}
-          {b.content.length > 100 && '…'}
-        </p>
-      </div>
-
-      {/* actions */}
-      <div>
-        <button onClick={() => setEditing(b)}>Edit</button>
-        <button onClick={() => delBlog(b._id)}>Delete</button>
-      </div>
-    </li>
-  ))}
-</ul>
-    </>
+      {/* Blogs Section */}
+      <hr />
+      <h2>All Blogs</h2>
+      <BlogForm
+        blog={editingBlog}
+        onSave={handleSaveBlog}
+        onCancel={() => setEditingBlog(null)}
+      />
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {blogs.map((b) => (
+          <li
+            key={b._id}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              marginBottom: 12,
+              padding: 8,
+              border: '1px solid #ddd',
+              borderRadius: 4,
+            }}
+          >
+            {b.image && (
+              <img
+                src={`http://localhost:5000${b.image}`}
+                alt={b.title}
+                style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }}
+              />
+            )}
+            <div style={{ flex: 1 }}>
+              <strong>{b.title}</strong>
+              <p style={{ margin: 0, fontSize: 14, color: '#555' }}>
+                {b.content.slice(0, 100)}
+                {b.content.length > 100 && '…'}
+              </p>
+            </div>
+            <div>
+              <button onClick={() => setEditingBlog(b)}>Edit</button>
+              <button onClick={() => handleDeleteBlog(b._id)}>Delete</button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
