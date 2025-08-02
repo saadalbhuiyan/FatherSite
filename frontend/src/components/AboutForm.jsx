@@ -18,31 +18,44 @@ export default function AboutForm({ data, onSave, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 600 }}>
-      <h3>About Section</h3>
+    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded border p-4">
+      <h3 className="text-lg font-semibold">About Section</h3>
+
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="About description"
         required
+        rows={4}
+        className="w-full rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
       />
+
       <input
         type="file"
         accept="image/*"
         onChange={(e) => setImage(e.target.files[0])}
+        className="block w-full text-sm text-slate-600 file:mr-2 file:rounded file:border-0 file:bg-sky-100 file:px-2 file:py-1 file:text-sky-700"
       />
-      <button type="submit" disabled={!description}>
-        {data ? 'Update' : 'Create'}
-      </button>
-      {data && (
+
+      <div className="flex gap-3">
         <button
-          type="button"
-          onClick={onCancel}
-          style={{ marginLeft: 10 }}
+          type="submit"
+          disabled={!description}
+          className="rounded bg-sky-600 px-4 py-2 text-white transition hover:bg-sky-700 disabled:opacity-50"
         >
-          Cancel
+          {data ? 'Update' : 'Create'}
         </button>
-      )}
+
+        {data && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded bg-slate-200 px-4 py-2 text-slate-700 transition hover:bg-slate-300"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

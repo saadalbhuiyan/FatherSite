@@ -16,46 +16,49 @@ export default function BlogList() {
   return (
     <>
       <Navbar />
-      <div style={{ maxWidth: 800, margin: 'auto', padding: 16 }}>
-        <h1>Blogs</h1>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* <h1 className="text-3xl font-bold text-slate-100 mb-8">Blogs</h1> */}
 
         {loading ? (
-          <p>Loading…</p>
+          <p className="text-slate-300">Loading…</p>
         ) : blogs.length === 0 ? (
-          <p>No blogs yet.</p>
+          <p className="text-slate-400">No blogs yet.</p>
         ) : (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {blogs.map((b) => (
-              <li
+              <Link
                 key={b._id}
-                style={{
-                  marginBottom: 24,
-                  padding: 12,
-                  border: '1px solid #eee',
-                  borderRadius: 6,
-                }}
+                to={`/blogs/${b._id}`}
+                className="group block bg-slate-800 rounded-xl shadow-lg overflow-hidden hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-sky-400 transition"
               >
-                <Link to={`/blogs/${b._id}`}>
-                  <h3>{b.title}</h3>
-                </Link>
-
-                <p style={{ margin: '8px 0', color: '#555' }}>
-                  {b.content.slice(0, 120)}
-                  {b.content.length > 120 && '…'}
-                </p>
-
+                {/* Image (optional) */}
                 {b.image && (
                   <img
                     src={`http://localhost:5000${b.image}`}
                     alt={b.title}
-                    style={{ maxWidth: 200, borderRadius: 4 }}
+                    className="h-48 w-full object-cover"
                   />
                 )}
-              </li>
+
+                <div className="p-5">
+                  <h3 className="text-xl font-semibold text-sky-400 group-hover:text-sky-300">
+                    {b.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-slate-300 line-clamp-3">
+                    {b.content.slice(0, 120)}
+                    {b.content.length > 120 && '…'}
+                  </p>
+
+                  <span className="mt-3 inline-block text-sm font-medium text-sky-500 group-hover:text-sky-400">
+                    Read more →
+                  </span>
+                </div>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
-      </div>
+      </main>
     </>
   );
 }

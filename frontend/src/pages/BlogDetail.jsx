@@ -14,39 +14,76 @@ export default function BlogDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <p className="text-slate-300">Loading…</p>
+        </main>
+      </>
+    );
+  }
+
+  if (!blog) {
+    return (
+      <>
+        <Navbar />
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <p className="text-red-400">Blog not found.</p>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
-      <div style={{ maxWidth: 800, margin: 'auto', padding: 16 }}>
-        <Link to="/blogs">← Back to blogs</Link>
-
-        {loading ? (
-          <p>Loading…</p>
-        ) : blog ? (
-          <>
-            <h1>{blog.title}</h1>
-
-            {blog.image && (
-              <img
-                src={`http://localhost:5000${blog.image}`}
-                alt={blog.title}
-                style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 16 }}
-              />
-            )}
-
-            <div
-              style={{ lineHeight: 1.6 }}
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Link
+          to="/blogs"
+          className="inline-flex items-center text-sm font-medium text-black-800 hover:text-sky-300 mb-4"
+        >
+          <svg
+            className="w-4 h-4 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
             />
+          </svg>
+          Back to blogs
+        </Link>
 
-            <p style={{ marginTop: 20, fontSize: 14, color: '#888' }}>
-              Posted on: {new Date(blog.createdAt).toLocaleString()}
-            </p>
-          </>
-        ) : (
-          <p>Blog not found.</p>
-        )}
-      </div>
+        <article>
+          <h1 className="text-4xl font-extrabold text-black-100 mb-4">
+            {blog.title}
+          </h1>
+
+          {blog.image && (
+            <img
+              src={`http://localhost:5000${blog.image}`}
+              alt={blog.title}
+              className="w-full h-auto rounded-xl mb-6"
+            />
+          )}
+
+          {/* Safe HTML rendering without dompurify */}
+          <div
+            className="prose prose-invert prose-slate max-w-none text-black-300"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
+
+          <p className="mt-8 text-sm text-slate-500">
+            Posted on {new Date(blog.createdAt).toLocaleString()}
+          </p>
+        </article>
+      </main>
     </>
   );
 }

@@ -5,8 +5,7 @@ export default function Home() {
     <>
       <Navbar />
       <div style={{ maxWidth: 800, margin: 'auto', padding: 16, textAlign: 'center' }}>
-        <h1>Welcome to Our Site</h1>
-        <p>Explore our blogs, learn more about us, or get in touch via the contact page.</p>
+        <h1>Welcome to pan islamic Movement website </h1>
       </div>
     </>
   );
