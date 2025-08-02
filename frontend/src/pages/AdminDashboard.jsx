@@ -11,6 +11,7 @@ import ContactForm from '../components/ContactForm';
 import Navbar from '../components/Navbar';
 
 export default function AdminDashboard() {
+  // State for blogs, about, and contact data
   const [blogs, setBlogs] = useState([]);
   const [editingBlog, setEditingBlog] = useState(null);
 
@@ -20,29 +21,48 @@ export default function AdminDashboard() {
   const [contact, setContact] = useState(null);
   const [editingContact, setEditingContact] = useState(false);
 
-  useEffect(() => { loadAllData(); }, []);
+  // Load all admin data when component mounts
+  useEffect(() => {
+    loadAllData();
+  }, []);
 
+  // Fetch blogs, about, and contact data concurrently
   const loadAllData = async () => {
-    const [b, a, c] = await Promise.allSettled([
-      fetchBlogs(), getAboutAdmin(), getContactAdmin(),
-    ]);
-    if (b.status === 'fulfilled') setBlogs(b.value.data);
-    if (a.status === 'fulfilled') setAbout(a.value.data);
-    if (c.status === 'fulfilled') setContact(c.value.data);
+    try {
+      const [blogsRes, aboutRes, contactRes] = await Promise.allSettled([
+        fetchBlogs(), getAboutAdmin(), getContactAdmin(),
+      ]);
+      if (blogsRes.status === 'fulfilled') setBlogs(blogsRes.value.data);
+      if (aboutRes.status === 'fulfilled') setAbout(aboutRes.value.data);
+      if (contactRes.status === 'fulfilled') setContact(contactRes.value.data);
+    } catch (err) {
+      console.error('Failed to load admin data:', err);
+    }
   };
 
-  /* Handlers omitted for brevity – identical logic, just call loadAllData() after each operation */
-
+  // Logout handler
   const handleLogout = () => {
     logout();
     localStorage.removeItem('adminToken');
     window.location.href = '/';
   };
 
+  // Helper function for confirm + delete pattern
+  const confirmAndDelete = (message, deleteFn, resetFn) => {
+    if (window.confirm(message)) {
+      deleteFn().then(() => {
+        resetFn(null);
+        loadAllData();
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-4">
       <Navbar />
+
       <div className="mx-auto max-w-5xl space-y-10">
+        {/* Header */}
         <header className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-slate-800">Admin Dashboard</h1>
           <button
@@ -74,14 +94,7 @@ export default function AdminDashboard() {
                   Edit
                 </button>
                 <button
-                  onClick={() => {
-                    if (window.confirm('Delete About?')) {
-                      deleteAbout().then(() => {
-                        setAbout(null);
-                        loadAllData();
-                      });
-                    }
-                  }}
+                  onClick={() => confirmAndDelete('Delete About?', deleteAbout, setAbout)}
                   className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
                 >
                   Delete
@@ -122,14 +135,7 @@ export default function AdminDashboard() {
                   Edit
                 </button>
                 <button
-                  onClick={() => {
-                    if (window.confirm('Delete Contact?')) {
-                      deleteContact().then(() => {
-                        setContact(null);
-                        loadAllData();
-                      });
-                    }
-                  }}
+                  onClick={() => confirmAndDelete('Delete Contact?', deleteContact, setContact)}
                   className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
                 >
                   Delete

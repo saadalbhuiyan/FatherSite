@@ -5,27 +5,32 @@ export default function BlogForm({ blog, onSave, onCancel }) {
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
 
+  // Load initial data for edit mode
   useEffect(() => {
     setTitle(blog?.title || '');
     setContent(blog?.content || '');
-    setImage(null);
+    setImage(null); // Clear previous file input
   }, [blog]);
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const fd = new FormData();
     fd.append('title', title);
     fd.append('content', content);
     if (image) fd.append('image', image);
+
     onSave(fd);
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded border p-4">
       <h3 className="text-lg font-semibold">
-        {blog ? 'Edit' : 'Create'} Blog
+        {blog ? 'Edit Blog' : 'Create Blog'}
       </h3>
 
+      {/* Blog Title */}
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -34,6 +39,7 @@ export default function BlogForm({ blog, onSave, onCancel }) {
         className="w-full rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
       />
 
+      {/* Blog Content */}
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
@@ -43,6 +49,16 @@ export default function BlogForm({ blog, onSave, onCancel }) {
         className="w-full rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
       />
 
+      {/* Optional: Show existing image if editing and no new image selected */}
+      {blog?.image && !image && (
+        <img
+          src={blog.image}
+          alt="Current"
+          className="h-32 w-full object-cover rounded border"
+        />
+      )}
+
+      {/* Image Upload */}
       <input
         type="file"
         accept="image/*"
@@ -50,6 +66,7 @@ export default function BlogForm({ blog, onSave, onCancel }) {
         className="block w-full text-sm text-slate-600 file:mr-2 file:rounded file:border-0 file:bg-sky-100 file:px-2 file:py-1 file:text-sky-700"
       />
 
+      {/* Action Buttons */}
       <div className="flex gap-3">
         <button
           type="submit"

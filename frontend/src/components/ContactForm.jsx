@@ -4,16 +4,20 @@ export default function ContactForm({ data, onSave, onCancel }) {
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
 
+  // Load initial data when editing existing contact info
   useEffect(() => {
     setDescription(data?.description || '');
-    setImage(null);
+    setImage(null); // Reset image input when data changes
   }, [data]);
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const fd = new FormData();
     fd.append('description', description);
     if (image) fd.append('image', image);
+
     onSave(fd);
   };
 
@@ -21,6 +25,7 @@ export default function ContactForm({ data, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded border p-4">
       <h3 className="text-lg font-semibold">Manage Contact</h3>
 
+      {/* Description textarea */}
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -30,6 +35,16 @@ export default function ContactForm({ data, onSave, onCancel }) {
         className="w-full rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
       />
 
+      {/* Optional: Show existing image if editing and no new image selected */}
+      {data?.imageUrl && !image && (
+        <img
+          src={data.imageUrl}
+          alt="Current Contact"
+          className="mb-2 h-24 w-full rounded object-cover border"
+        />
+      )}
+
+      {/* Image upload input */}
       <input
         type="file"
         accept="image/*"
@@ -37,6 +52,7 @@ export default function ContactForm({ data, onSave, onCancel }) {
         className="block w-full text-sm text-slate-600 file:mr-2 file:rounded file:border-0 file:bg-sky-100 file:px-2 file:py-1 file:text-sky-700"
       />
 
+      {/* Buttons */}
       <div className="flex gap-3">
         <button
           type="submit"
