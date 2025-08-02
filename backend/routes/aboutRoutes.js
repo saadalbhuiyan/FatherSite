@@ -7,7 +7,7 @@ import {
   updateAbout,
   deleteAbout,
   getPublicAbout
-} from "../models/aboutController.js";
+} from "../controllers/aboutController.js";
 
 const router = express.Router();
 

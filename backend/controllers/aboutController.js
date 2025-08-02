@@ -1,4 +1,4 @@
-import About from "./About.js";
+import About from "../models/About.js";
 
 /**
  * Create "About" content (only allowed once)
